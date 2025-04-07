@@ -1,4 +1,4 @@
-package ch.heig.gre.groupF;
+package ch.heig.gre.groupD;
 
 import ch.heig.gre.maze.MazeBuilder;
 import ch.heig.gre.maze.MazeGenerator;
