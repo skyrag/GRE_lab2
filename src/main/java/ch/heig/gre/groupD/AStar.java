@@ -5,6 +5,9 @@ import ch.heig.gre.graph.PositiveWeightFunction;
 import ch.heig.gre.graph.VertexLabelling;
 import ch.heig.gre.maze.GridMazeSolver;
 
+import java.util.Arrays;
+import java.util.PriorityQueue;
+
 public final class AStar implements GridMazeSolver {
   public enum Heuristic {
     DIJKSTRA, INFINITY_NORM, EUCLIDEAN_NORM, MANHATTAN, K_MANHATTAN
@@ -32,6 +35,48 @@ public final class AStar implements GridMazeSolver {
                       int source,
                       int destination,
                       VertexLabelling<Boolean> processed) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    //throw new UnsupportedOperationException("Not implemented yet");
+
+    //Pour chaque sommet i, posé dist = infini et p[j] = NULL
+    int[] distance = new int[grid.nbVertices()];
+    Arrays.fill(distance, 100000); // devrait etre inf
+    Object[] pred = new Object[grid.nbVertices()];
+    Arrays.fill(pred, null);
+
+    //calcul de l'heuristique
+
+    //Queue de priorité des sommets à traiter
+    PriorityQueue<Integer> priorityQueue = new PriorityQueue<>();
+    priorityQueue.add(source);
+    distance[source] = 0;
+
+    while (!priorityQueue.isEmpty()) {
+      int vertex = priorityQueue.poll();
+
+      //on a trouvé la destination
+      if (vertex == destination) {
+        break;
+      }
+
+      //Pour chaque successeur
+      for (Integer i : grid.neighbors(vertex)) {
+        if (pred[i] == null) {
+          if (distance[i] > distance[vertex] /* + poids ij */) {
+            if (distance[i] == 100000) { //INFINI
+              //calculer heuristique de j
+
+            }
+            distance[i] = distance[vertex] /* +poids ij */;
+            pred[i] = vertex;
+            if (!priorityQueue.contains(i)) {
+              priorityQueue.add(i);
+            }
+          }
+        }
+      }
+
+    }
+
+    return null;
   }
 }
