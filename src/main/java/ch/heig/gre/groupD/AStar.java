@@ -5,8 +5,7 @@ import ch.heig.gre.graph.PositiveWeightFunction;
 import ch.heig.gre.graph.VertexLabelling;
 import ch.heig.gre.maze.GridMazeSolver;
 
-import java.util.Arrays;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public final class AStar implements GridMazeSolver {
   public enum Heuristic {
@@ -39,19 +38,34 @@ public final class AStar implements GridMazeSolver {
 
     //Pour chaque sommet i, posé dist = infini et p[j] = NULL
     int[] distance = new int[grid.nbVertices()];
-    Arrays.fill(distance, 100000); // devrait etre inf
-    Object[] pred = new Object[grid.nbVertices()];
-    Arrays.fill(pred, null);
+    Arrays.fill(distance, Integer.MAX_VALUE); // devrait etre inf
+    int[] pred = new int[grid.nbVertices()];
+    Arrays.fill(pred, -1);
 
-    //calcul de l'heuristique
+
+    //calcul de l'heuristique CAS DIJKSTRA
+    int[] heuristicTab = new int[grid.nbVertices()];
+    Arrays.fill(heuristicTab, 0); //devrait être null
+
 
     //Queue de priorité des sommets à traiter
-    PriorityQueue<Integer> priorityQueue = new PriorityQueue<>();
+    PriorityQueue<Integer> priorityQueue = new PriorityQueue<>(
+            Comparator.comparingInt(v -> distance[v] + heuristicTab[v]));
     priorityQueue.add(source);
     distance[source] = 0;
 
+    //nombre de sommet traité
+    int nbProcessed = 0;
+
     while (!priorityQueue.isEmpty()) {
       int vertex = priorityQueue.poll();
+
+      //le sommet a déjà été traité
+      if (processed.getLabel(vertex) == true) {
+        continue;
+      }
+      processed.setLabel(vertex, true);
+      nbProcessed++;
 
       //on a trouvé la destination
       if (vertex == destination) {
@@ -60,23 +74,28 @@ public final class AStar implements GridMazeSolver {
 
       //Pour chaque successeur
       for (Integer i : grid.neighbors(vertex)) {
-        if (pred[i] == null) {
-          if (distance[i] > distance[vertex] /* + poids ij */) {
-            if (distance[i] == 100000) { //INFINI
-              //calculer heuristique de j
+        if (distance[i] > distance[vertex] + weights.get(vertex, i)) {
 
-            }
-            distance[i] = distance[vertex] /* +poids ij */;
-            pred[i] = vertex;
-            if (!priorityQueue.contains(i)) {
-              priorityQueue.add(i);
-            }
+          distance[i] = distance[vertex] + weights.get(vertex, i);
+          pred[i] = vertex;
+
+          if (!processed.getLabel(i)) {
+            priorityQueue.add(i);
           }
         }
       }
-
+    }
+    //creation de la list
+    List<Integer> parcours = new ArrayList<>();
+    if (distance[destination] != -1) { //si -1 -> pas de résultat
+      int current_vertex = destination;
+      while (current_vertex != -1) {
+        parcours.add(current_vertex);
+        current_vertex = pred[current_vertex];
+      }
+      Collections.reverse(parcours);
     }
 
-    return null;
+    return new Result(parcours, distance[destination], nbProcessed);
   }
 }
